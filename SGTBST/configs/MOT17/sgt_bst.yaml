@@ -1,0 +1,46 @@
+_BASE_: "../Base-SGTBST.yaml"
+MODEL:
+  WEIGHTS: "/projects/DATA_ROOT/checkpoints/model_0002529.pth"
+  SGT:
+    INFERENCE_GT: False
+  DETECTOR:
+    META_ARCHITECTURE: "CenterNet"
+    WEIGHTS: "/projects/DATA_ROOT_No_Classify/checkpoints/centernet_dla34_coco.pth"
+  TRACKER:
+    INIT_DET_THRESH: 0.5
+    GNN:
+      TOPK_DET_FLAG: True
+      TOPK_DET: 100
+      DET_LOW_THRESH: 0.2
+      NODE_MODEL:
+        CLASSIFY:
+          FLAG: True
+          INF_THRESH: 0.4
+          LOSS_WEIGHT: 10.0
+      EDGE_MODEL:
+        CLASSIFY:
+          INF_THRESH: 0.4
+#          LOSS_WEIGHT: 0.1
+          LOSS_WEIGHT: 1.0
+SOLVER:
+  OPTIMIZER: "Adam"
+  IMS_PER_BATCH: 8 # 12
+  BASE_LR: 0.0002 # 0.0002
+  WEIGHT_DECAY: 0.0
+  STEPS: (50, )
+  MAX_EPOCH: 60
+#  STEPS: (50, )
+#  MAX_EPOCH: 60
+  WARMUP_ITERS: 20
+  CHECKPOINT_PERIOD: 4
+TEST:
+  EVAL_PERIOD: 4
+  EVAL_FILTER_DET_SCORE_THRESH: 0.5
+  EVAL_MIN_VISIBILITY: 0.0
+DATASETS:
+  TRAIN: ("mix_mot17_sub_train", )
+  TEST: ("mot17_sub_val",)
+INPUT:
+  CLIP_BY_IMAGE: False
+  FILTER_OUT_IMAGE: False
+  TRAIN_MIN_VISIBILITY: 0.0

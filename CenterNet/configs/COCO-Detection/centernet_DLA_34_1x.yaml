@@ -1,0 +1,11 @@
+_BASE_: "../Base-CenterNet.yaml"
+MODEL:
+  WEIGHTS: "/projects/DATA_ROOT/checkpoints/centernet_dla34_coco.pth"
+  BACKBONE:
+    NAME: "DLA"
+  CENTERNET:
+    UPSAMPLE_LAYER:
+      NAME: "DLASegUp"
+DATASETS:
+  TRAIN: ("mix_mot17_sub_train",)
+  TEST: ("nfs_coco_2017_val",)

@@ -1,0 +1,103 @@
+MODEL:
+  META_ARCHITECTURE: "SparseGraphTracker"
+  MASK_ON: False
+  PIXEL_MEAN: [ 0.408, 0.447, 0.470 ]
+  PIXEL_STD: [ 0.289, 0.274, 0.278 ]
+  DETECTOR:
+    ENABLED: True
+    FREEZE: False
+    META_ARCHITECTURE: "CenterNet"
+  IDENTITY_ON: True
+  BACKBONE:
+    NAME: "DLA"
+  CENTERNET:
+    UPSAMPLE_LAYER:
+      NAME: "DLASegUp"
+#    NUM_CLASSES: 1  # lj.改了11
+    NUM_CLASSES: 11
+    INPUT_ALIGN: False
+    TLBR_FLAG: True
+    OUTPUT_SIZE: (608, 1088)
+    HM_SIZE: (152, 272)
+    MAX_PER_IMAGE: 500
+    ID_LOSS: False
+  TRACKER:
+    ENABLED: True
+    META_ARCHITECTURE: "GraphTracker"
+    GNN:
+      GRAPH:
+        ATTR: [ 'iou', 'sim', 'dist' ] # iou | sim | dist
+        PREV_DET_PROPOSAL_FLAG: True
+        TOPK: 10
+      N_ITER: 3
+      TOPK_DET: 100
+      NODE_MODEL:
+        UPDATE:
+          IN_DIM: 64
+          FC_DIMS: [ 128, 128 ]
+          AGG_FUNC: 'mean' # max | mean | sum
+          REATTACH: False
+          SKIP_CONN: False
+          TMPNN_FLAG: False
+          SHARED_FLAG: False
+          SELF_LOOP: False
+        CLASSIFY:
+          FLAG: True
+          INF_THRESH: 0.4
+          DEEP_LOSS: False
+          LOSS_WEIGHT: 10.0
+          FC_DIMS: [ 64, 64 ]
+      EDGE_MODEL: # ENCODE.OUT_DIM = UPDATE.IN_DIM = CLASSIFY.IN_DIM
+        ENCODE:
+          DIRECTIONAL_EDGE_ATTR: True
+          EDGE_ATTR: [ 'xy_diff', 'wh_ratio', 'cos_sim', 'iou' ] # [ 'iou','cos_sim' ]
+          IN_DIM: 6 # 2
+          FC_DIMS: [ 32, 32 ]
+          OUT_DIM: 32
+        UPDATE:
+          IN_DIM: 32
+          FC_DIMS: [ 128, 64 ]
+          REATTACH: True
+          SKIP_CONN: False
+          SELF_LOOP: False
+        CLASSIFY:
+          LOSS_WEIGHT: 1.0
+          IN_DIM: 32
+          FC_DIMS: [ 32, 32 ]
+          INF_THRESH: 0.40
+          DEEP_LOSS: False
+          EXCLUDE_INIT_LOSS: True
+TEST:
+  EVAL_DETECTION: True
+  EVAL_TRACKING:  True
+  EVAL_FILTER_DET_FLAG: True
+  EVAL_DET_BY_SEQ_FLAG: False
+DATASETS:
+  FILL_ID_FLAG: True
+  DENSE_SAMPLING_DATASETS: ['mot15', 'mot17', 'mot20', 'hieve']
+  SPARSE_SAMPLING_DATASETS: ['caltech']
+DATALOADER:
+  REASSIGN_ID: True
+  ASPECT_RATIO_GROUPING: False
+  FILTER_EMPTY_ANNOTATIONS: True
+  FILTER_PAIRLESS_ANNOTATIONS: False
+  SAMPLER_TEST: "SeqInferenceSampler"
+  PARALLEL_BATCH: True
+  NUM_SAMPLES_TRAIN: 2
+  NUM_SAMPLES_TEST: 1
+  PRE_SAMPLE_FLAG: False
+  PRE_SAMPLE_INTERVAL: 5
+  MAX_FRAME_DIST_TRAIN: 30
+  MAX_FRAME_DIST_TEST: 1
+  MIN_FRAME_DIST_TRAIN: 1
+  MIN_FRAME_DIST_TEST: 1
+  MAX_FRAME_DIST_TRAIN_SPARSE: 3
+  MIN_FRAME_DIST_TRAIN_SPARSE: 1
+  SEED: 8018783
+INPUT:
+  NORM_BY_MEAN_STD_FLAG: True
+  FORMAT: 'BGR'
+  CLIP_BY_IMAGE: False
+  FILTER_OUT_IMAGE: False
+VERSION: 2
+SEED: 8018783
